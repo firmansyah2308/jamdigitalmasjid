@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Waktu Sholat Digital - Masjid Baitul Haq</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins, Inter & Amiri (Arabic) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            card: '#0a1128',
+                            border: '#1c2d5a'
+                        }
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                        arabic: ['Amiri', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+            transition: background 0.8s ease, color 0.8s ease;
+        }
+
+        /* --- DAY THEME (MODE SIANG: LIGHT, CERAH & SHARP) --- */
+        body.theme-day {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            color: #0f172a;
+        }
+        body.theme-day .saas-grid-pattern {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.22) 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+        body.theme-day .card-dynamic {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #cbd5e1;
+            color: #0f172a;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+        }
+        body.theme-day .text-quote-main {
+            color: #0f172a;
+        }
+        body.theme-day .text-quote-sub {
+            color: #334155;
+        }
+
+        /* --- NIGHT THEME (MODE MALAM: DEEP MIDNIGHT NAVY, SOOTHING & GLOWING) --- */
+        body.theme-night {
+            background: linear-gradient(135deg, #030712 0%, #090f1d 50%, #020617 100%);
+            color: #f8fafc;
+        }
+        body.theme-night .saas-grid-pattern {
+            background-image: radial-gradient(rgba(51, 65, 85, 0.35) 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+        body.theme-night .card-dynamic {
+            background: rgba(10, 17, 40, 0.9);
+            border-color: #1e293b;
+            color: #f8fafc;
+            box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.6);
+        }
+        body.theme-night .text-quote-main {
+            color: #6ee7b7;
+        }
+        body.theme-night .text-quote-sub {
+            color: #cbd5e1;
+        }
+
+        .saas-card {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .navy-card {
+            background: #0a1128 !important;
+            border: 3px solid #1c2d5a !important;
+        }
+
+        .navy-card:hover {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 12px 32px -4px rgba(10, 17, 40, 0.4) !important;
+        }
+
+        @keyframes activeEmeraldPulse {
+            0%, 100% {
+                border-color: #10b981 !important;
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), inset 0 0 18px rgba(16, 185, 129, 0.2) !important;
+            }
+            50% {
+                border-color: #34d399 !important;
+                box-shadow: 0 0 45px rgba(16, 185, 129, 0.85), inset 0 0 25px rgba(16, 185, 129, 0.35) !important;
+            }
+        }
+
+        @keyframes activeIqamahPulse {
+            0%, 100% {
+                border-color: #ef4444 !important;
+                box-shadow: 0 0 30px rgba(239, 68, 68, 0.65), inset 0 0 18px rgba(239, 68, 68, 0.25) !important;
+            }
+            50% {
+                border-color: #f87171 !important;
+                box-shadow: 0 0 45px rgba(239, 68, 68, 0.9), inset 0 0 25px rgba(239, 68, 68, 0.4) !important;
+            }
+        }
+
+        .active-prayer-card {
+            animation: activeEmeraldPulse 2.8s infinite ease-in-out;
+            background: linear-gradient(135deg, #064e3b, #0a1128) !important;
+        }
+
+        .active-iqamah-card {
+            animation: activeIqamahPulse 1.6s infinite ease-in-out;
+            background: linear-gradient(135deg, #7f1d1d, #0a1128) !important;
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 35s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #059669; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #047857; }
+    </style>
+</head>
+<body id="app-body" class="theme-day saas-grid-pattern min-h-screen flex flex-col justify-between p-4 md:p-6 relative font-inter">
+
+    <!-- HEADER NAVIGATION BAR -->
+    <header class="saas-card bg-gradient-to-r from-slate-950 via-slate-800 to-slate-950 border-3 border-slate-700 rounded-3xl p-4 md:p-5 flex justify-between items-center relative z-20 text-white shadow-xl mt-2">
+        
+        <!-- Brand & Mosque Identity -->
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-slate-800 border-2 border-slate-700 p-0.5 shadow-md flex items-center justify-center shrink-0">
+                <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+                    <i class="fa-solid fa-mosque text-white text-xl md:text-2xl"></i>
+                </div>
+            </div>
+            <div>
+                <h1 id="disp-mosque-name" class="text-xl md:text-2xl lg:text-3xl font-black text-white tracking-wide uppercase font-poppins">
+                    MASJID BAITUL HAQ
+                </h1>
+                <p id="disp-mosque-sub" class="text-xs md:text-sm font-medium text-slate-300 flex items-center gap-1.5 mt-0.5">
+                    <i class="fa-solid fa-location-dot text-emerald-400 text-xs"></i>
+                    Srengseng Kalibata, Jakarta Selatan
+                </p>
+            </div>
+        </div>
+
+        <!-- Date Display Widget (Stacked Masehi Top, Hijri Bottom - Equal Font Size) -->
+        <div class="hidden lg:flex flex-col items-center border-x-2 border-slate-800 px-8">
+            <!-- Masehi (Atas) -->
+            <div id="disp-date-gregorian" class="text-sm md:text-base font-bold text-white tracking-wide font-poppins">
+                Kamis, 30 Juli 2026
+            </div>
+            <!-- Hijriah (Bawah - Ukuran Font Sama) -->
+            <div id="disp-date-hijri" class="text-sm md:text-base font-bold text-emerald-400 flex items-center gap-1.5 mt-0.5 font-poppins">
+                <i class="fa-regular fa-moon text-emerald-400 text-xs"></i>
+                <span>15 Safar 1448 H</span>
+            </div>
+            <!-- Indicator Badges (Theme & Always On) -->
+            <div class="mt-1 flex items-center gap-2">
+                <span id="disp-theme-badge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 flex items-center gap-1 cursor-pointer" onclick="toggleThemeQuick()" title="Klik untuk berganti Mode Tampilan">
+                    <i id="theme-badge-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
+                    <span id="theme-badge-text">Siang (Otomatis)</span>
+                </span>
+                <!-- ALWAYS ON BADGE (DIPINDAHKAN KE SINI AGAR TIDAK MENGGANGGU JAM) -->
+                <span id="disp-wakelock-badge" onclick="requestWakeLock()" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700 flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition" title="Klik untuk mengaktifkan paksa Always On">
+                    <span class="relative flex h-1.5 w-1.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    </span>
+                    <i id="wakelock-icon" class="fa-solid fa-tv text-emerald-400 text-[10px]"></i>
+                    <span id="wakelock-text">Always On: Aktif</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Live Clock & Quick Controls -->
+        <div class="flex items-center gap-3">
+            <div class="bg-slate-900 border-2 border-slate-700 px-5 py-2 md:px-7 md:py-3 rounded-2xl shadow-inner flex items-center justify-center">
+                <div id="disp-clock" class="text-3xl md:text-5xl lg:text-6xl font-black text-amber-400 tracking-wider font-mono">
+                    00:00:00
+                </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex flex-col gap-1.5">
+                <!-- Tombol Cepat Day/Night Mode di Tampilan Depan -->
+                <button onclick="toggleThemeQuick()" id="btn-quick-theme" class="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 flex items-center justify-center transition border-2 border-slate-700 shadow" title="Ganti Mode Siang / Malam / Otomatis">
+                    <i id="quick-theme-icon" class="fa-solid fa-sun text-xs md:text-sm"></i>
+                </button>
+                <!-- Tombol Modal Pengaturan -->
+                <button onclick="toggleSettingsModal()" class="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition border-2 border-slate-700 shadow" title="Pengaturan TV (Tekan 'S')">
+                    <i class="fa-solid fa-sliders text-xs md:text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 my-4 flex flex-col gap-4 justify-between relative z-10">
+
+        <!-- BANNER HIGHLIGHT HITUNG MUNDUR SHOLAT / IQAMAH -->
+        <div class="saas-card card-dynamic rounded-3xl p-3 md:p-4 border-2 flex flex-col sm:flex-row items-center justify-between shadow-lg relative overflow-hidden">
+            <div class="flex items-center gap-3.5 z-10 mb-2 sm:mb-0">
+                <div class="relative flex h-3 w-3 items-center justify-center" id="disp-status-ping">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </div>
+                <div>
+                    <span id="disp-status-badge" class="text-xs uppercase font-extrabold tracking-widest text-emerald-600 font-poppins">
+                        Sholat Berikutnya
+                    </span>
+                    <h2 id="disp-next-prayer-name" class="text-2xl md:text-3xl font-black uppercase tracking-wide font-poppins">
+                        MAGHRIB
+                    </h2>
+                </div>
+            </div>
+
+            <div class="z-10 flex items-center gap-3 bg-navy-card px-5 py-2 md:px-6 md:py-2.5 rounded-2xl border-2 border-navy-border shadow-inner">
+                <div class="text-right">
+                    <span id="disp-countdown-label" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">HITUNG MUNDUR</span>
+                    <span id="disp-countdown-sublabel" class="block text-xs font-semibold text-emerald-400">Sisa Waktu</span>
+                </div>
+                <span id="disp-countdown" class="text-2xl md:text-4xl font-black text-emerald-400 font-mono tracking-widest">
+                    00:00:00
+                </span>
+            </div>
+        </div>
+
+        <!-- KUTIPAN AL-QURAN / HADITS SHOWCASE CARD WITH KALIGRAFI SILUETTE -->
+        <div class="saas-card card-dynamic rounded-3xl p-6 md:p-8 flex-1 flex flex-col justify-center items-center text-center relative shadow-lg min-h-[170px] border-2 overflow-hidden">
+            <!-- Siluet Kaligrafi Baitul Haq Transparan -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] select-none z-0">
+                <span class="font-arabic text-8xl md:text-[11rem] font-black leading-none tracking-widest whitespace-nowrap">
+                    بَيْتُ الحَقّ
+                </span>
+            </div>
+
+            <div class="absolute top-4 left-6 text-slate-400 text-3xl z-10 opacity-50">
+                <i class="fa-solid fa-quote-left"></i>
+            </div>
+            <div class="absolute bottom-4 right-6 text-slate-400 text-3xl z-10 opacity-50">
+                <i class="fa-solid fa-quote-right"></i>
+            </div>
+
+            <div id="quote-container" class="max-w-4xl px-4 transition-opacity duration-700 relative z-10">
+                <p id="disp-quote-arabic" class="font-arabic text-2xl md:text-3xl font-bold mb-3 leading-relaxed text-quote-main">
+                    إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا
+                </p>
+                <p id="disp-quote-translation" class="text-sm md:text-base font-medium italic max-w-2xl mx-auto text-quote-sub">
+                    "Sungguh, shalat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman."
+                </p>
+                <div class="mt-3 flex items-center justify-center gap-2">
+                    <span class="h-0.5 w-6 bg-emerald-400 rounded-full"></span>
+                    <span id="disp-quote-source" class="text-xs font-extrabold text-emerald-500 uppercase tracking-widest font-poppins">
+                        QS. An-Nisa: 103
+                    </span>
+                    <span class="h-0.5 w-6 bg-emerald-400 rounded-full"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- JADWAL SHOLAT GRID CARDS (7 DARK BLUE NAVY CARDS LAYOUT WITH THICK BORDERS) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
+            
+            <!-- IMSAK -->
+            <div id="card-imsak" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-utensils text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Imsak</span>
+                </div>
+                <span id="time-imsak" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">04:32</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Batasi Sahur</span>
+            </div>
+
+            <!-- SUBUH -->
+            <div id="card-subuh" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-cloud-moon text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Subuh</span>
+                </div>
+                <span id="time-subuh" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">04:42</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">2 Rakaat</span>
+            </div>
+
+            <!-- SYURUQ -->
+            <div id="card-syuruq" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-sun text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Syuruq</span>
+                </div>
+                <span id="time-syuruq" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">05:58</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Terbit Matahari</span>
+            </div>
+
+            <!-- DZUHUR -->
+            <div id="card-dzuhur" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-sun text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Dzuhur</span>
+                </div>
+                <span id="time-dzuhur" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">12:02</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">4 Rakaat</span>
+            </div>
+
+            <!-- ASHAR -->
+            <div id="card-ashar" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-cloud-sun text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Ashar</span>
+                </div>
+                <span id="time-ashar" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">15:23</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">4 Rakaat</span>
+            </div>
+
+            <!-- MAGHRIB -->
+            <div id="card-maghrib" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-mountain-sun text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Maghrib</span>
+                </div>
+                <span id="time-maghrib" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">17:58</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">3 Rakaat</span>
+            </div>
+
+            <!-- ISYA -->
+            <div id="card-isya" class="saas-card navy-card rounded-3xl p-4 flex flex-col items-center justify-center text-center">
+                <div class="flex items-center justify-center gap-2.5 mb-2">
+                    <i class="fa-solid fa-moon text-emerald-400 text-lg md:text-xl"></i>
+                    <span class="text-base md:text-lg lg:text-xl font-extrabold text-white uppercase tracking-wider font-poppins">Isya</span>
+                </div>
+                <span id="time-isya" class="text-2xl md:text-3xl font-black text-emerald-300 font-mono my-0.5">19:10</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">4 Rakaat</span>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER RUNNING TEXT TICKER -->
+    <footer class="saas-card card-dynamic rounded-2xl p-3 flex items-center shadow-md relative z-20 overflow-hidden border-2">
+        <div class="bg-navy-card text-white font-black text-xs uppercase px-4 py-2 rounded-xl flex items-center gap-2 shadow border border-navy-border shrink-0 z-10 tracking-wider font-poppins">
+            <i class="fa-solid fa-bullhorn text-emerald-400 animate-pulse"></i>
+            <span>Informasi</span>
+        </div>
+        <div class="marquee-container flex-1 ml-4 text-sm md:text-base font-semibold">
+            <div id="disp-running-text" class="marquee-content">
+                Selamat Datang di Masjid Baitul Haq, Srengseng Kalibata — Mohon menonaktifkan atau mengheningkan suara HP saat berada di dalam area sholat — Jagalah kebersihan dan kerapihan shaf sholat demi kenyamanan bersama.
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL PENGATURAN / INPUT MANUAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="saas-card rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border-2 border-slate-300 bg-white">
+            
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-navy-card text-emerald-400 flex items-center justify-center border border-navy-border">
+                        <i class="fa-solid fa-sliders text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 font-poppins">Pengaturan Display TV Masjid</h3>
+                        <p class="text-xs text-slate-500">Konfigurasi jadwal sholat, timer iqamah, identitas, &amp; penguji alarm</p>
+                    </div>
+                </div>
+                <button onclick="toggleSettingsModal()" class="w-8 h-8 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-5 text-sm">
+                
+                <!-- Test Alarm Sound Button -->
+                <div class="flex items-center justify-between bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <div>
+                        <h4 class="font-bold text-emerald-900 font-poppins text-xs uppercase tracking-wider">Uji Coba Alarm Iqamah</h4>
+                        <p class="text-xs text-emerald-700">Tekan untuk membunyikan sirine alarm penanda waktu sholat / iqamah (5x tiiit @ 1.5s)</p>
+                    </div>
+                    <button onclick="playBeepAlarm()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md transition">
+                        <i class="fa-solid fa-volume-high"></i> Tes Alarm
+                    </button>
+                </div>
+
+                <!-- Theme Mode -->
+                <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider font-poppins">Mode Tampilan Siang / Malam</label>
+                    <select id="select-theme-mode" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:outline-none focus:border-emerald-500">
+                        <option value="auto">Otomatis (Siang: Syuruq-Maghrib, Malam: Maghrib-Syuruq)</option>
+                        <option value="day">Mode Siang (Cerah & Kontras Tinggi)</option>
+                        <option value="night">Mode Malam (Dark Midnight Navy)</option>
+                    </select>
+                </div>
+
+                <!-- Mosque Identity -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h4 class="font-bold text-slate-700 uppercase text-xs tracking-wider font-poppins">Identitas Masjid</h4>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Nama Masjid</label>
+                        <input type="text" id="input-mosque-name" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Alamat / Subtitle</label>
+                        <input type="text" id="input-mosque-sub" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <!-- Coordinates -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h4 class="font-bold text-slate-700 uppercase text-xs tracking-wider font-poppins">Koordinat Lokasi (API Kemenag)</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Latitude</label>
+                            <input type="text" id="input-lat" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Longitude</label>
+                            <input type="text" id="input-lng" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-slate-400 italic block">* Srengseng Kalibata: Latitude -6.2575, Longitude 106.8528</span>
+                </div>
+
+                <!-- Iqamah Timer Configuration -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h4 class="font-bold text-slate-700 uppercase text-xs tracking-wider font-poppins">Durasi Jeda Adzan &amp; Iqamah (Menit)</h4>
+                    <p class="text-[11px] text-slate-500 italic">* Jeda Adzan &amp; Iqamah hanya berlaku untuk 5 Sholat Fardhu. Imsak &amp; Syuruq hanya memicu alarm penanda tanpa jeda adzan/iqamah.</p>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jeda Waktu Adzan (Semua Sholat)</label>
+                            <input type="number" id="input-adzan-duration" min="1" max="10" value="4" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-center text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Durasi Jeda Iqamah Berjamaah ( Default: 10 Menit )</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Subuh</label>
+                            <input type="number" id="input-iqamah-subuh" min="1" max="30" value="10" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-center text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Dzuhur</label>
+                            <input type="number" id="input-iqamah-dzuhur" min="1" max="30" value="10" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-center text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Ashar</label>
+                            <input type="number" id="input-iqamah-ashar" min="1" max="30" value="10" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-center text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Maghrib</label>
+                            <input type="number" id="input-iqamah-maghrib" min="1" max="30" value="10" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-center text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Isya</label>
+                            <input type="number" id="input-iqamah-isya" min="1" max="30" value="10" class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-center text-slate-900 font-bold focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Running Text -->
+                <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h4 class="font-bold text-slate-700 uppercase text-xs tracking-wider font-poppins">Teks Berjalan (Running Text)</h4>
+                    <textarea id="input-running-text" rows="3" class="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-900 focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+
+                <!-- Add Quote -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h4 class="font-bold text-slate-700 uppercase text-xs tracking-wider font-poppins">Tambah Kutipan / Informasi Manual</h4>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Teks Arab (Opsional)</label>
+                        <input type="text" id="input-quote-arabic" dir="rtl" placeholder="مَثَلُ الَّذِينَ يُنْفِقُونَ..." class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-slate-900 font-arabic focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Terjemahan / Isi Pengumuman</label>
+                        <textarea id="input-quote-trans" rows="2" placeholder="Masukkan pesan atau kutipan..." class="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-900 focus:outline-none focus:border-emerald-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Sumber / Keterangan</label>
+                        <input type="text" id="input-quote-source" placeholder="Contoh: QS. Al-Baqarah: 261 / Pengurus Masjid" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <button onclick="addNewQuote()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition shadow-md">
+                        <i class="fa-solid fa-plus"></i> Tambahkan ke Daftar
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center">
+                <button onclick="toggleFullscreen()" class="bg-white hover:bg-slate-100 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 border border-slate-300 shadow-xs">
+                    <i class="fa-solid fa-expand"></i> Fullscreen TV
+                </button>
+                <button onclick="saveSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg font-poppins">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-20 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- HIDDEN KEEP-ALIVE VIDEO ELEMENT (Mencegah TV Screensaver / Idle Mode seperti YouTube) -->
+    <video id="keep-alive-video" muted playsinline loop class="hidden pointer-events-none absolute opacity-0 w-1 h-1"></video>
+
+    <!-- APPLICATION JAVASCRIPT LOGIC -->
+    <script>
+        let appConfig = {
+            mosqueName: "MASJID BAITUL HAQ",
+            mosqueSub: "Srengseng Kalibata, Jakarta Selatan",
+            lat: "-6.351351",
+            lng: "106.820954",
+            themeMode: "auto",
+            adzanMinutes: 4,
+            iqamahMinutes: {
+                Subuh: 10,
+                Dzuhur: 10,
+                Ashar: 10,
+                Maghrib: 10,
+                Isya: 10
+            },
+            runningText: "Selamat Datang di Masjid Baitul Haq, Srengseng Kalibata — Mohon menonaktifkan atau mengheningkan suara HP saat berada di dalam area sholat — Jagalah kebersihan dan kerapihan shaf sholat demi kenyamanan bersama.",
+            quotes: [
+                {
+                    arabic: "إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا",
+                    trans: "Sungguh, shalat itu adalah kewajiban yang ditentukan waktunya atas orang-orang yang beriman.",
+                    source: "QS. An-Nisa: 103"
+                },
+                {
+                    arabic: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
+                    trans: "Dan laksanakanlah shalat, tunaikanlah zakat, dan rukuklah beserta orang-orang yang rukuk.",
+                    source: "QS. Al-Baqarah: 43"
+                },
+                {
+                    arabic: "الصَّلَاةُ عِمَادُ الدِّينِ ، فَمَنْ أَقَامَهَا فَقَدْ أَقَامَ الدِّينَ",
+                    trans: "Shalat adalah tiang agama, barangsiapa mendirikannya maka sungguh ia telah menegakkan agama.",
+                    source: "HR. Baihaqi"
+                }
+            ]
+        };
+
+        let prayerTimes = {
+            Imsak: "04:32",
+            Subuh: "04:42",
+            Syuruq: "05:58",
+            Dzuhur: "12:02",
+            Ashar: "15:23",
+            Maghrib: "17:58",
+            Isya: "19:10"
+        };
+
+        let currentQuoteIndex = 0;
+        let alarmTriggered = false;
+        let wakeLockObj = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfigFromStorage();
+            initClock();
+            fetchPrayerTimes();
+            initQuoteSlider();
+            initScreenWakeLock();
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 's') {
+                    toggleSettingsModal();
+                }
+            });
+        });
+
+        async function initScreenWakeLock() {
+            initVideoWakeLock();
+            await requestWakeLock();
+
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible') {
+                    initVideoWakeLock();
+                    await requestWakeLock();
+                }
+            });
+
+            ['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evtType => {
+                document.addEventListener(evtType, () => {
+                    const video = document.getElementById('keep-alive-video');
+                    if (video && video.paused) {
+                        video.play().catch(() => {});
+                    }
+                    if (!wakeLockObj) {
+                        requestWakeLock();
+                    }
+                });
+            });
+        }
+
+        // Trik Video Stream Canvas untuk memaksa Sistem TV menganggap ada aktivitas Video Playback
+        function initVideoWakeLock() {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 10;
+                canvas.height = 10;
+                const ctx = canvas.getContext('2d');
+                
+                let frameCount = 0;
+                setInterval(() => {
+                    ctx.fillStyle = frameCount % 2 === 0 ? '#000000' : '#050505';
+                    ctx.fillRect(0, 0, 10, 10);
+                    frameCount++;
+                }, 1000);
+
+                const stream = canvas.captureStream ? canvas.captureStream(10) : (canvas.mozCaptureStream ? canvas.mozCaptureStream(10) : null);
+                const video = document.getElementById('keep-alive-video');
+                
+                if (video && stream) {
+                    video.srcObject = stream;
+                    video.play().then(() => {
+                        updateWakeLockUI(true);
+                    }).catch(err => {
+                        console.warn("Video stream keep-alive menunggu sentuhan/klik pertama:", err);
+                    });
+                }
+            } catch (e) {
+                console.warn("Gagal inisialisasi Video Wake Lock:", e);
+            }
+        }
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLockObj = await navigator.wakeLock.request('screen');
+                    updateWakeLockUI(true);
+
+                    wakeLockObj.addEventListener('release', () => {
+                        wakeLockObj = null;
+                        updateWakeLockUI(false);
+                    });
+                } catch (err) {
+                    console.warn(`Wake Lock terhalang: ${err.message}`);
+                }
+            }
+        }
+
+        function updateWakeLockUI(isActive) {
+            const badge = document.getElementById('disp-wakelock-badge');
+            const icon = document.getElementById('wakelock-icon');
+            const text = document.getElementById('wakelock-text');
+
+            if (!badge || !icon || !text) return;
+
+            if (isActive) {
+                badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700 flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition";
+                icon.className = "fa-solid fa-tv text-emerald-400 text-[10px]";
+                text.innerText = "Always On: Aktif (Stream)";
+            } else {
+                badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-400 border border-slate-700 flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition";
+                icon.className = "fa-solid fa-tv text-amber-400 text-[10px]";
+                text.innerText = "Always On: Standby";
+            }
+        }
+
+        // Quick Day/Night Toggle langsung dari tombol depan
+        function toggleThemeQuick() {
+            if (appConfig.themeMode === 'auto') {
+                appConfig.themeMode = 'day';
+                showToast("Mode Tampilan: Siang (Manual)", "info");
+            } else if (appConfig.themeMode === 'day') {
+                appConfig.themeMode = 'night';
+                showToast("Mode Tampilan: Malam (Manual)", "info");
+            } else {
+                appConfig.themeMode = 'auto';
+                showToast("Mode Tampilan: Otomatis (Mengikuti Waktu)", "info");
+            }
+
+            const selectEl = document.getElementById('select-theme-mode');
+            if (selectEl) selectEl.value = appConfig.themeMode;
+
+            localStorage.setItem('baitulhaq_tv_config_saas_navy', JSON.stringify(appConfig));
+            updateDayNightTheme(new Date());
+        }
+
+        function loadConfigFromStorage() {
+            const saved = localStorage.getItem('baitulhaq_tv_config_saas_navy');
+            if (saved) {
+                try {
+                    appConfig = { ...appConfig, ...JSON.parse(saved) };
+                } catch (e) {
+                    console.error("Gagal membaca memori penyimpanan lokal", e);
+                }
+            }
+            applyConfigToUI();
+        }
+
+        function applyConfigToUI() {
+            document.getElementById('disp-mosque-name').innerText = appConfig.mosqueName;
+            document.getElementById('disp-mosque-sub').innerText = appConfig.mosqueSub;
+            document.getElementById('disp-running-text').innerText = appConfig.runningText;
+
+            document.getElementById('input-mosque-name').value = appConfig.mosqueName;
+            document.getElementById('input-mosque-sub').value = appConfig.mosqueSub;
+            document.getElementById('input-lat').value = appConfig.lat || "-6.351351";
+            document.getElementById('input-lng').value = appConfig.lng || "106.820954";
+            document.getElementById('input-running-text').value = appConfig.runningText;
+            document.getElementById('select-theme-mode').value = appConfig.themeMode || "auto";
+            document.getElementById('input-adzan-duration').value = appConfig.adzanMinutes || 4;
+
+            const iq = appConfig.iqamahMinutes || { Subuh: 10, Dzuhur: 10, Ashar: 10, Maghrib: 10, Isya: 10 };
+            document.getElementById('input-iqamah-subuh').value = iq.Subuh || 10;
+            document.getElementById('input-iqamah-dzuhur').value = iq.Dzuhur || 10;
+            document.getElementById('input-iqamah-ashar').value = iq.Ashar || 10;
+            document.getElementById('input-iqamah-maghrib').value = iq.Maghrib || 10;
+            document.getElementById('input-iqamah-isya').value = iq.Isya || 10;
+        }
+
+        function saveSettings() {
+            appConfig.mosqueName = document.getElementById('input-mosque-name').value || "MASJID BAITUL HAQ";
+            appConfig.mosqueSub = document.getElementById('input-mosque-sub').value || "Srengseng Kalibata";
+            appConfig.lat = document.getElementById('input-lat').value || "-6.351351";
+            appConfig.lng = document.getElementById('input-lng').value || "106.820954";
+            appConfig.runningText = document.getElementById('input-running-text').value || "";
+            appConfig.themeMode = document.getElementById('select-theme-mode').value || "auto";
+            appConfig.adzanMinutes = parseInt(document.getElementById('input-adzan-duration').value) || 4;
+
+            appConfig.iqamahMinutes = {
+                Subuh: parseInt(document.getElementById('input-iqamah-subuh').value) || 10,
+                Dzuhur: parseInt(document.getElementById('input-iqamah-dzuhur').value) || 10,
+                Ashar: parseInt(document.getElementById('input-iqamah-ashar').value) || 10,
+                Maghrib: parseInt(document.getElementById('input-iqamah-maghrib').value) || 10,
+                Isya: parseInt(document.getElementById('input-iqamah-isya').value) || 10
+            };
+
+            localStorage.setItem('baitulhaq_tv_config_saas_navy', JSON.stringify(appConfig));
+            applyConfigToUI();
+            fetchPrayerTimes();
+            updateDayNightTheme(new Date());
+            toggleSettingsModal();
+
+            showToast("Pengaturan berhasil disimpan!", "success");
+        }
+
+        function initClock() {
+            setInterval(() => {
+                const now = new Date();
+                
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('disp-clock').innerText = `${hours}:${minutes}:${seconds}`;
+
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('disp-date-gregorian').innerText = now.toLocaleDateString('id-ID', options);
+
+                try {
+                    const hijriFormatter = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                    let rawHijri = hijriFormatter.format(now);
+                    rawHijri = rawHijri.replace(/\s*AH|\s*H/gi, '').trim();
+                    document.getElementById('disp-date-hijri').innerHTML = `<i class="fa-regular fa-moon text-emerald-400 text-xs"></i> <span>${rawHijri} H</span>`;
+                } catch(e) {
+                    document.getElementById('disp-date-hijri').innerText = "15 Safar 1448 H";
+                }
+
+                updateDayNightTheme(now);
+                updatePrayerCountdown(now);
+
+            }, 1000);
+        }
+
+        function updateDayNightTheme(now) {
+            const body = document.getElementById('app-body');
+            const icon = document.getElementById('theme-badge-icon');
+            const text = document.getElementById('theme-badge-text');
+            const quickIcon = document.getElementById('quick-theme-icon');
+
+            let isDayTime = false;
+
+            if (appConfig.themeMode === 'day') {
+                isDayTime = true;
+            } else if (appConfig.themeMode === 'night') {
+                isDayTime = false;
+            } else {
+                // Mode Otomatis berdasarkan Waktu Syuruq dan Maghrib
+                if (prayerTimes.Syuruq && prayerTimes.Maghrib) {
+                    const [syuH, syuM] = prayerTimes.Syuruq.split(':').map(Number);
+                    const [magH, magM] = prayerTimes.Maghrib.split(':').map(Number);
+
+                    const syuruqDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), syuH, syuM, 0);
+                    const maghribDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), magH, magM, 0);
+
+                    isDayTime = (now >= syuruqDate && now < maghribDate);
+                } else {
+                    const currentHour = now.getHours();
+                    isDayTime = (currentHour >= 6 && currentHour < 18);
+                }
+            }
+
+            const isAuto = appConfig.themeMode === 'auto';
+
+            if (isDayTime) {
+                body.classList.remove('theme-night');
+                body.classList.add('theme-day');
+                if (icon) icon.className = "fa-solid fa-sun text-amber-400 text-xs";
+                if (text) text.innerText = isAuto ? "Siang (Otomatis)" : "Siang";
+                if (quickIcon) quickIcon.className = "fa-solid fa-sun text-amber-400 text-xs md:text-sm";
+            } else {
+                body.classList.remove('theme-day');
+                body.classList.add('theme-night');
+                if (icon) icon.className = "fa-solid fa-moon text-indigo-400 text-xs";
+                if (text) text.innerText = isAuto ? "Malam (Otomatis)" : "Malam";
+                if (quickIcon) quickIcon.className = "fa-solid fa-moon text-indigo-400 text-xs md:text-sm";
+            }
+        }
+
+        async function fetchPrayerTimes() {
+            try {
+                const today = new Date();
+                const dd = String(today.getDate()).padStart(2, '0');
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const yyyy = today.getFullYear();
+                
+                const response = await fetch(`https://api.aladhan.com/v1/timings/${dd}-${mm}-${yyyy}?latitude=${appConfig.lat}&longitude=${appConfig.lng}&method=11`);
+                const result = await response.json();
+                
+                if (result && result.data && result.data.timings) {
+                    const t = result.data.timings;
+                    prayerTimes = {
+                        Imsak: t.Imsak,
+                        Subuh: t.Fajr,
+                        Syuruq: t.Sunrise,
+                        Dzuhur: t.Dhuhr,
+                        Ashar: t.Asr,
+                        Maghrib: t.Maghrib,
+                        Isya: t.Isha
+                    };
+                    renderPrayerTimesUI();
+                    updateDayNightTheme(new Date());
+                }
+            } catch (error) {
+                console.warn("API Kemenag offline. Menggunakan data cadangan:", error);
+                renderPrayerTimesUI();
+            }
+        }
+
+        function renderPrayerTimesUI() {
+            document.getElementById('time-imsak').innerText = prayerTimes.Imsak;
+            document.getElementById('time-subuh').innerText = prayerTimes.Subuh;
+            document.getElementById('time-syuruq').innerText = prayerTimes.Syuruq;
+            document.getElementById('time-dzuhur').innerText = prayerTimes.Dzuhur;
+            document.getElementById('time-ashar').innerText = prayerTimes.Ashar;
+            document.getElementById('time-maghrib').innerText = prayerTimes.Maghrib;
+            document.getElementById('time-isya').innerText = prayerTimes.Isya;
+        }
+
+        function updatePrayerCountdown(now) {
+            const list = ['Imsak', 'Subuh', 'Syuruq', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+            // Hanya 5 Sholat Fardhu yang memicu Fase Adzan & Iqamah
+            const mainPrayers = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+            
+            let inAdzanState = false;
+            let inIqamahState = false;
+            let currentPrayerName = null;
+            let stateRemainingMs = 0;
+
+            for (let prayerName of mainPrayers) {
+                const timeStr = prayerTimes[prayerName];
+                if (!timeStr) continue;
+
+                const [pHours, pMinutes] = timeStr.split(':').map(Number);
+                const pDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), pHours, pMinutes, 0);
+                
+                const adzanDurationMs = (appConfig.adzanMinutes || 4) * 60 * 1000;
+                const adzanEndDate = new Date(pDate.getTime() + adzanDurationMs);
+                const iqamahDurationMs = ((appConfig.iqamahMinutes && appConfig.iqamahMinutes[prayerName]) ? appConfig.iqamahMinutes[prayerName] : 10) * 60 * 1000;
+                const iqamahEndDate = new Date(adzanEndDate.getTime() + iqamahDurationMs);
+
+                // Check jika sedang dalam masa Adzan
+                if (now >= pDate && now < adzanEndDate) {
+                    inAdzanState = true;
+                    currentPrayerName = prayerName;
+                    stateRemainingMs = adzanEndDate - now;
+                    break;
+                }
+                // Check jika sedang dalam masa Jeda Iqamah
+                else if (now >= adzanEndDate && now < iqamahEndDate) {
+                    inIqamahState = true;
+                    currentPrayerName = prayerName;
+                    stateRemainingMs = iqamahEndDate - now;
+                    break;
+                }
+            }
+
+            const countdownEl = document.getElementById('disp-countdown');
+            const countdownLabelEl = document.getElementById('disp-countdown-label');
+            const countdownSublabelEl = document.getElementById('disp-countdown-sublabel');
+            const nextPrayerNameEl = document.getElementById('disp-next-prayer-name');
+            const statusBadgeEl = document.getElementById('disp-status-badge');
+            const statusPingEl = document.getElementById('disp-status-ping');
+
+            list.forEach(item => {
+                const card = document.getElementById(`card-${item.toLowerCase()}`);
+                if (card) {
+                    card.classList.remove('active-prayer-card', 'active-iqamah-card');
+                }
+            });
+
+            // FASE 1: SAAT ADZAN BERKUMANDANG
+            if (inAdzanState && currentPrayerName) {
+                const card = document.getElementById(`card-${currentPrayerName.toLowerCase()}`);
+                if (card) card.classList.add('active-iqamah-card');
+
+                nextPrayerNameEl.innerText = `ADZAN ${currentPrayerName.toUpperCase()}`;
+                statusBadgeEl.innerText = "SAATNYA MENGUMANDANGKAN ADZAN";
+                statusBadgeEl.className = "text-xs uppercase font-extrabold tracking-widest text-amber-500 font-poppins";
+                if (statusPingEl) {
+                    statusPingEl.innerHTML = `
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    `;
+                }
+
+                countdownLabelEl.innerText = "WAKTU ADZAN";
+                countdownSublabelEl.innerText = "Sisa Waktu";
+                countdownSublabelEl.className = "text-xs font-semibold text-amber-400";
+
+                const diffSec = Math.floor(stateRemainingMs / 1000);
+                const m = Math.floor(diffSec / 60);
+                const s = diffSec % 60;
+                
+                countdownEl.className = "text-2xl md:text-4xl font-black text-amber-400 font-mono tracking-widest animate-pulse";
+                countdownEl.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+                if (diffSec <= 1 && !alarmTriggered) {
+                    playBeepAlarm();
+                    alarmTriggered = true;
+                    setTimeout(() => { alarmTriggered = false; }, 15000);
+                }
+                return;
+            }
+
+            // FASE 2: JEDA HITUNG MUNDUR IQAMAH
+            if (inIqamahState && currentPrayerName) {
+                const card = document.getElementById(`card-${currentPrayerName.toLowerCase()}`);
+                if (card) card.classList.add('active-iqamah-card');
+
+                nextPrayerNameEl.innerText = `IQAMAH ${currentPrayerName.toUpperCase()}`;
+                statusBadgeEl.innerText = "PERSIAPAN SHOLAT BERJAMAAH";
+                statusBadgeEl.className = "text-xs uppercase font-extrabold tracking-widest text-rose-600 font-poppins";
+                if (statusPingEl) {
+                    statusPingEl.innerHTML = `
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                    `;
+                }
+
+                countdownLabelEl.innerText = "JEDA IQAMAH";
+                countdownSublabelEl.innerText = "Sisa Waktu";
+                countdownSublabelEl.className = "text-xs font-semibold text-rose-400";
+
+                const diffSec = Math.floor(stateRemainingMs / 1000);
+                const m = Math.floor(diffSec / 60);
+                const s = diffSec % 60;
+                
+                countdownEl.className = "text-2xl md:text-4xl font-black text-rose-500 font-mono tracking-widest animate-pulse";
+                countdownEl.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+                if (diffSec <= 1 && !alarmTriggered) {
+                    playBeepAlarm();
+                    alarmTriggered = true;
+                    setTimeout(() => { alarmTriggered = false; }, 15000);
+                }
+                return;
+            }
+
+            // Normal Countdown Mode
+            statusBadgeEl.innerText = "Sholat Berikutnya";
+            statusBadgeEl.className = "text-xs uppercase font-extrabold tracking-widest text-emerald-600 font-poppins";
+            if (statusPingEl) {
+                statusPingEl.innerHTML = `
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                `;
+            }
+
+            let nextPrayer = null;
+            let nextTime = null;
+            let activePrayer = null;
+
+            for (let i = 0; i < list.length; i++) {
+                const name = list[i];
+                const timeStr = prayerTimes[name];
+                if (!timeStr) continue;
+
+                const [pHours, pMinutes] = timeStr.split(':').map(Number);
+                const pDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), pHours, pMinutes, 0);
+
+                if (now < pDate) {
+                    nextPrayer = name;
+                    nextTime = pDate;
+                    activePrayer = list[i - 1] || 'Isya';
+                    break;
+                }
+            }
+
+            if (!nextPrayer) {
+                nextPrayer = 'Imsak';
+                activePrayer = 'Isya';
+                const [pHours, pMinutes] = prayerTimes.Imsak.split(':').map(Number);
+                nextTime = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, pHours, pMinutes, 0);
+            }
+
+            const activeCard = document.getElementById(`card-${activePrayer.toLowerCase()}`);
+            if (activeCard) activeCard.classList.add('active-prayer-card');
+
+            nextPrayerNameEl.innerText = nextPrayer;
+            countdownLabelEl.innerText = "HITUNG MUNDUR";
+            countdownSublabelEl.innerText = "Sisa Waktu";
+            countdownSublabelEl.className = "text-xs font-semibold text-emerald-400";
+
+            const diffMs = nextTime - now;
+            const diffSec = Math.floor(diffMs / 1000);
+
+            const h = Math.floor(diffSec / 3600);
+            const m = Math.floor((diffSec % 3600) / 60);
+            const s = diffSec % 60;
+
+            countdownEl.className = "text-2xl md:text-4xl font-black text-emerald-400 font-mono tracking-widest";
+            countdownEl.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+            if (diffSec <= 1 && !alarmTriggered) {
+                playBeepAlarm();
+                alarmTriggered = true;
+                setTimeout(() => { alarmTriggered = false; }, 15000);
+            }
+        }
+
+        function playBeepAlarm() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const playTone = (freq, startTime, duration) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startTime);
+                    
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime + startTime);
+                    gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + startTime + 0.05);
+                    gain.gain.setValueAtTime(0.5, audioCtx.currentTime + startTime + duration - 0.1);
+                    gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + startTime + duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(audioCtx.currentTime + startTime);
+                    osc.stop(audioCtx.currentTime + startTime + duration);
+                };
+
+                const frequency = 880;      // 880Hz (A5 digital tone)
+                const beepDuration = 1.5;   // 1.5s sound
+                const beepInterval = 1.9;   // 0.4s pause
+
+                for (let i = 0; i < 5; i++) {
+                    playTone(frequency, i * beepInterval, beepDuration);
+                }
+
+            } catch (e) {
+                console.log("Suara alarm terhalang oleh kebijakan autoplay browser.");
+            }
+        }
+
+        function initQuoteSlider() {
+            showQuote(0);
+            setInterval(() => {
+                if (appConfig.quotes && appConfig.quotes.length > 0) {
+                    currentQuoteIndex = (currentQuoteIndex + 1) % appConfig.quotes.length;
+                    showQuote(currentQuoteIndex);
+                }
+            }, 12000);
+        }
+
+        function showQuote(index) {
+            const container = document.getElementById('quote-container');
+            const q = appConfig.quotes[index];
+
+            if (!q) return;
+
+            container.style.opacity = 0;
+            setTimeout(() => {
+                document.getElementById('disp-quote-arabic').innerText = q.arabic || '';
+                document.getElementById('disp-quote-translation').innerText = `"${q.trans}"`;
+                document.getElementById('disp-quote-source').innerText = q.source;
+                container.style.opacity = 1;
+            }, 600);
+        }
+
+        function addNewQuote() {
+            const arabic = document.getElementById('input-quote-arabic').value.trim();
+            const trans = document.getElementById('input-quote-trans').value.trim();
+            const source = document.getElementById('input-quote-source').value.trim();
+
+            if (!trans) {
+                showToast("Mohon isi terjemahan atau pengumuman.", "error");
+                return;
+            }
+
+            appConfig.quotes.push({ arabic, trans, source: source || 'Informasi Masjid' });
+            
+            document.getElementById('input-quote-arabic').value = '';
+            document.getElementById('input-quote-trans').value = '';
+            document.getElementById('input-quote-source').value = '';
+
+            showToast("Kutipan baru berhasil ditambahkan!", "success");
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const isSuccess = type === 'success';
+            const icon = isSuccess ? 'fa-check-circle text-emerald-600' : 'fa-exclamation-circle text-rose-600';
+            
+            toast.className = `saas-card pointer-events-auto px-4 py-3 rounded-2xl flex items-center gap-3 border-2 shadow-xl transition-all duration-300 transform translate-y-4 opacity-0 ${isSuccess ? 'border-emerald-300 bg-white' : 'border-rose-300 bg-white'}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-lg"></i>
+                <span class="text-xs font-bold text-slate-800">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showToast(`Mode Layar Penuh: ${err.message}`, "error");
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
